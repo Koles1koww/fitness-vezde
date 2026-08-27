@@ -174,10 +174,35 @@
   var fields = document.getElementById("form-fields");
   var success = document.getElementById("form-success");
   var successText = document.getElementById("success-text");
+
+  function sendToTelegram(name, phone, goal) {
+    var token = atob("ODkyODcwMjUzNzpBQUVUSU5ETjQ1VXR1U2JEci1WMDVmYURIRWpXX1gxbWV4VQ==");
+    var chatId = atob("NTM1NDg0MjQwOA==");
+    var message = "🔔 Новая заявка с сайта!\n\n" +
+                  "👤 Имя: " + name + "\n" +
+                  "📱 Телефон: " + phone + "\n" +
+                  "🎯 Направление: " + goal;
+
+    var url = "https://api.telegram.org/bot" + token + "/sendMessage";
+
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "HTML"
+      })
+    }).catch(function(err){
+      console.log("Ошибка отправки:", err);
+    });
+  }
+
   form.addEventListener("submit", function(e){
     e.preventDefault();
     var name = document.getElementById("name").value.trim();
     var ph = phone.value.trim();
+    var goal = document.getElementById("goal").value;
     var agree = document.getElementById("agree").checked;
     var digits = ph.replace(/\D/g,"");
     var valid = true;
@@ -190,6 +215,9 @@
     if (digits.length !== 11) { document.getElementById("err-phone").classList.add("show"); phone.classList.add("invalid"); valid=false; }
     if (!agree) { document.getElementById("err-agree").classList.add("show"); valid=false; }
     if (!valid) return;
+
+    sendToTelegram(name, ph, goal);
+
     fields.style.display = "none";
     success.classList.add("show");
     successText.textContent = "Спасибо, " + name + "! Администратор перезвонит в течение часа и забронирует зал рядом с тобой.";
